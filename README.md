@@ -122,9 +122,9 @@ Check your balance before large batches. Snov.io's API is limited to **60 reques
 - A Google account with a Google Sheets credential configured in n8n
 
 **Steps**
-1. Import the workflow JSON via *Workflows, Import from file*.
-2. **Replace the Snov.io credentials.** The `Snov - Get Access Token` node takes a client ID and secret. Store them as n8n credentials or environment variables rather than pasting them into the node (see [Security](#security)).
-3. **Create the Google Sheet** with two tabs, `Leads` and `Review Queue`, using the headers in [Google Sheet schema](#google-sheet-schema). Then re-select the spreadsheet and tabs in the `Append Approved Leads` and `Review_Queue` nodes and attach your Google Sheets credential.
+1. Import [`workflow/snov-io-hr-prospect-project.json`](workflow/snov-io-hr-prospect-project.json) via *Workflows, Import from file*.
+2. **Replace the Snov.io credentials.** The exported file ships with placeholders (`YOUR_SNOV_CLIENT_ID`, `YOUR_SNOV_CLIENT_SECRET`). The `Snov - Get Access Token` node takes a client ID and secret. Store them as n8n credentials or environment variables rather than pasting them into the node (see [Security](#security)).
+3. **Create the Google Sheet** with two tabs, `Leads` and `Review Queue`, using the headers in [Google Sheet schema](#google-sheet-schema). Then re-select the spreadsheet and tabs in the `Append Approved Leads` and `Review_Queue` nodes (the file ships with the placeholder `YOUR_GOOGLE_SHEET_ID`) and attach your Google Sheets credential.
 4. **Set `Limit`.** The node ships with its default of 1 item. Use 3 to 5 for the first test, then raise it.
 5. Click **Execute workflow**.
 

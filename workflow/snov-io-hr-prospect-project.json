@@ -1,0 +1,2364 @@
+{
+  "name": "Snov.io HR Prospect Project",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "b18b4174-df3b-498c-9f99-10b7c321b463",
+      "name": "When clicking ‘Execute workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1808,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.snov.io/v1/oauth/access_token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "client_credentials"
+            },
+            {
+              "name": "client_id",
+              "value": "YOUR_SNOV_CLIENT_ID"
+            },
+            {
+              "name": "client_secret",
+              "value": "YOUR_SNOV_CLIENT_SECRET"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5a55ac48-d64a-4a94-93a7-2674c7510893",
+      "name": "Snov - Get Access Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -1584,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.snov.io/v2/database-search/prospects/start",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "=\n{{ JSON.stringify({\n  access_token: $node[\"Snov - Get Access Token\"].json[\"access_token\"],\n  page: 1,\n  filters: {\n    prospect: {\n      job_titles: {\n        include: [\n          \"HR Manager\",\n          \"Human Resources Manager\",\n          \"Talent Acquisition\",\n          \"Talent Acquisition Specialist\",\n          \"Recruiter\",\n          \"HR Business Partner\"\n        ]\n      },\n      departments: {\n        include: [\"human_resources\"]\n      },\n      locations: {\n        include: {\n          locality: {\n            locality: \"Hyderabad, Telangana, India\",\n            location_type: \"city\"\n          },\n          location_type: {\n            locality: \"Hyderabad, Telangana, India\",\n            location_type: \"city\"\n          }\n        }\n      }\n    }\n  }\n}) }}\n",
+        "options": {}
+      },
+      "id": "19a555cf-2402-4b24-9be0-cd7da5b0b4a6",
+      "name": "Snov - Search HR Prospects",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -1360,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.snov.io/v2/database-search/prospects/result/' + $node[\"Snov - Search HR Prospects\"].json[\"meta\"][\"task_hash\"] }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $node[\"Snov - Get Access Token\"].json[\"access_token\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a5badf25-8a9a-4639-a800-f622b803c7d9",
+      "name": "Snov - Get Prospect Results",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -1136,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data.prospects",
+        "options": {}
+      },
+      "id": "766eecd5-b387-4f91-9317-9f60e9ed5567",
+      "name": "Split Out Prospects",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0062e00b-1d6b-4e4f-a97f-4942d237e4ab",
+              "leftValue": "={{ $json.job_title }}",
+              "rightValue": "recruiter",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "8fef584a-f0b0-40d9-b71b-4df453cedfcb",
+              "leftValue": "={{ $json.job_title }}",
+              "rightValue": "HR Manager",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "5d0c26c5-913e-49dc-af63-d61627ad6318",
+              "leftValue": "={{ $json.job_title }}",
+              "rightValue": "HR ",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "b53cc98e-cb72-4c9e-a094-bbe74122019c",
+              "leftValue": "={{ $json.job_title }}",
+              "rightValue": "Talent Acquisition Manager",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "5ac4abf9-9471-4829-86cb-a9e601dfea29",
+              "leftValue": "={{ $json.job_title }}",
+              "rightValue": "Talent Acquisition",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "8b455431-429b-41cf-9087-8364a57da5c1",
+              "leftValue": "={{ $json.job_title }}",
+              "rightValue": "Recruiter Manager",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "097c4fa2-45b1-4c0a-88d4-879bbc56632b",
+              "leftValue": "={{ $json.job_title }}",
+              "rightValue": "Human Resources manager",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "5436fc5c-9987-4613-a644-48bc4b2deff3",
+              "leftValue": "={{ $json.job_title }}",
+              "rightValue": "Manager - HR",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "37f5d238-5773-42a4-8393-b2932a2617b1",
+              "leftValue": "={{ $json.job_title }}",
+              "rightValue": "Manager, Human Resources",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "id": "ad38fb97-bcd5-48de-9e0a-7b63a75bc350",
+      "name": "Job Title Filter",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -688,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3c50a65a-6387-4ffb-8eee-3295cef5d1ff",
+              "leftValue": "={{ $json.location }}",
+              "rightValue": "Hyderabad",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "ee37bd3e-4943-45e3-a355-29bad84ede49",
+              "leftValue": "={{ $json.location }}",
+              "rightValue": "Andhra Pradesh",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "264c89df-8c94-4a7e-bff6-c8e693cfc804",
+              "leftValue": "={{ $json.location }}",
+              "rightValue": "Telangana",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -464,
+        736
+      ],
+      "id": "483e7ebc-ffd3-4102-8772-cc439e3fdad8",
+      "name": "Location Filter"
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        736
+      ],
+      "id": "9245b66b-21bd-4bf1-8d2b-9dcfb516d674",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e96cf7ae-2056-476d-ac68-abe3e4b44cdd",
+              "name": "first_name",
+              "value": "={{ $json.first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "2a5ac162-bc1f-457a-8277-67e8ae02bc30",
+              "name": "last_name",
+              "value": "={{ $json.last_name }}",
+              "type": "string"
+            },
+            {
+              "id": "28f4bbb9-9c81-4bf0-955a-8cf9d8fe0c75",
+              "name": "job_title",
+              "value": "={{ $json.job_title }}",
+              "type": "string"
+            },
+            {
+              "id": "97e9ed5c-e362-4dd3-8ad6-90dfec009239",
+              "name": "location",
+              "value": "={{ $json.location }}",
+              "type": "string"
+            },
+            {
+              "id": "2ef06096-554f-4285-a9db-9b590e10cab6",
+              "name": "industry",
+              "value": "={{ $json.industry }}",
+              "type": "string"
+            },
+            {
+              "id": "c1cca75d-2dc2-4942-9b58-f1f22bc4bc2e",
+              "name": "company_name",
+              "value": "={{ $json.company?.name || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "72b6ff30-a901-4927-bf8f-c87277f04711",
+              "name": "company_domain",
+              "value": "={{ $json.company?.domain || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "00ec695b-4b62-481e-9408-f99f50c76801",
+              "name": "reveal_url",
+              "value": "={{ $json.email_and_hidden_info_reveal || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1f52abb9-7cda-40d9-bebf-74db45b62b16",
+      "name": "Prepare Prospect",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.reveal_url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ access_token: $(\"Snov - Get Access Token\").first().json.access_token }) }}",
+        "options": {}
+      },
+      "id": "2301df6a-51ae-4a40-bcfa-066c8750133c",
+      "name": "Snov - Reveal Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        208,
+        736
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 4
+      },
+      "id": "b4af1fa0-e4e8-41b5-b47c-f5dab50650ce",
+      "name": "Wait Reveal",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        432,
+        736
+      ],
+      "webhookId": "6e51ced7-1d5b-4d78-a00b-0ce8b44f3adc"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.snov.io/v2/database-search/prospects/search-emails/result/' + $json.meta?.task_hash }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $(\"Snov - Get Access Token\").first().json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9470133a-96f2-40c7-92f9-210003005ec2",
+      "name": "Snov - Get Reveal Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        656,
+        656
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "22c9098e-f831-4e94-92dc-f19773e629de",
+              "leftValue": "={{ $json.status === 'in_progress' && $runIndex < 12 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4e30e2f3-9f21-4133-8b6c-83d5623e6967",
+      "name": "Reveal Still Processing?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst base = $('Prepare Prospect').item.json;\nconst r = $input.item.json || {};\nconst d = r.data && !Array.isArray(r.data) ? r.data : {};\nconst emails = Array.isArray(d.emails) ? d.emails : [];\nconst best = emails.find((e) => e.smtp_status === 'valid') || emails[0];\nconst ok = r.status === 'completed' && !!best && !!best.email;\nconst lastOk = base.last_name && !String(base.last_name).includes('*') ? base.last_name : '';\nreturn { json: {\n  ...base,\n  first_name: d.first_name || base.first_name,\n  last_name: d.last_name || lastOk,\n  linkedin_url: d.linkedin_url || '',\n  email: ok ? best.email : '',\n  email_status: ok ? (best.smtp_status || 'unknown') : 'NOT_FOUND',\n  reveal_status: r.status || 'n/a',\n} };\n"
+      },
+      "id": "efc0d889-a641-4312-bc47-7d1ddf275290",
+      "name": "Compile Revealed Contact",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "71fc1e57-b2c8-4291-b8ad-b4a718715100",
+              "leftValue": "={{ /^https?:\\/\\/([a-z]{2,3}\\.)?linkedin\\.com\\/in\\//i.test($json.linkedin_url || '') && !String($json.linkedin_url).includes('*') }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c0966c22-1a15-4df1-8295-0cd440ce9bb7",
+      "name": "LinkedIn URL Available?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1344,
+        896
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6f5a8f7a-eaa6-42c3-9e15-cb10b9995719",
+              "name": "employment_status",
+              "value": "NOT_CHECKED_NO_LINKEDIN_URL",
+              "type": "string"
+            },
+            {
+              "id": "ed779c96-087f-4ecb-b155-852212289748",
+              "name": "lead_status",
+              "value": "REVIEW_NO_LINKEDIN_URL",
+              "type": "string"
+            },
+            {
+              "id": "d8632b5a-0c9e-4496-98d6-75d5ad69eae7",
+              "name": "verification_reason",
+              "value": "Email revealed but no LinkedIn URL was returned, so company and designation could not be verified",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "054d0c00-fa43-45c4-a45d-35dcdde0c25f",
+      "name": "Tag No LinkedIn URL",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        7296,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.snov.io/v2/li-profiles-by-urls/start",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ \"Bearer \" + $(\"Snov - Get Access Token\").first().json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "urls[]",
+              "value": "={{ $json.linkedin_url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "17ed5838-2971-43aa-9c80-ccd62205256f",
+      "name": "Snov - Start LinkedIn Enrichment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1552,
+        656
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 6
+      },
+      "id": "2136b4b5-6a3b-48ad-bec5-afe3feb2b39a",
+      "name": "Wait LinkedIn",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1776,
+        656
+      ],
+      "webhookId": "8f554201-d2ca-477a-93e2-e7f109e07337"
+    },
+    {
+      "parameters": {
+        "url": "https://api.snov.io/v2/li-profiles-by-urls/result",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "task_hash",
+              "value": "={{ $json.meta?.task_hash || $json.data?.task_hash }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ \"Bearer \" + $(\"Snov - Get Access Token\").first().json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "52dfe1f1-f724-424f-820c-97938741a1f3",
+      "name": "Snov - Get LinkedIn Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2000,
+        592
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f0457d3d-ca84-4632-9335-e6b648125793",
+              "leftValue": "={{ $json.status === 'in_progress' && $runIndex < 12 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "90af7ef9-c9b9-4ad6-b450-7c2555c91591",
+      "name": "LinkedIn Still Processing?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2224,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst HR_TITLE = /(\\bhr\\b|human resources|talent|recruit|people|hiring|staffing)/i;\nconst clean = (s) => String(s || '').toLowerCase()\n  .replace(/&/g, ' and ')\n  .replace(/\\b(pvt|private|ltd|limited|llp|llc|inc|incorporated|corp|corporation|co|company)\\b/g, ' ')\n  .replace(/[^a-z0-9]+/g, ' ')\n  .trim();\nconst hostOf = (u) => String(u || '').replace(/^https?:\\/\\//i, '').replace(/^www\\./i, '').split(/[\\/?#]/)[0].toLowerCase();\nconst sameDomain = (a, b) => !!a && !!b && (a === b || a.endsWith('.' + b) || b.endsWith('.' + a));\nconst sameName = (x, y) => {\n  const a = clean(x), b = clean(y);\n  if (!a || !b) return false;\n  return a === b || (Math.min(a.length, b.length) >= 4 && (a.includes(b) || b.includes(a)));\n};\nconst titleTokens = (t) => new Set(\n  String(t || '').toLowerCase()\n    .replace(/human resources?/g, 'hr')\n    .replace(/recruitment|recruiter|recruiting/g, 'recruit')\n    .replace(/[^a-z0-9 ]+/g, ' ')\n    .split(/\\s+/)\n    .filter((w) => w && !['and', 'of', 'the', 'for', 'a'].includes(w))\n);\nconst titleMatch = (a, b) => {\n  const x = titleTokens(a), y = titleTokens(b);\n  if (!x.size || !y.size) return false;\n  const [small, big] = x.size <= y.size ? [x, y] : [y, x];\n  const inter = [...small].filter((w) => big.has(w)).length;\n  if (small.size >= 2 && inter === small.size) return true;\n  return inter / new Set([...x, ...y]).size >= 0.6;\n};\n\nconst p = $('Compile Revealed Contact').item.json;\nconst res = $input.item.json || {};\n\nconst rec = Array.isArray(res.data) ? res.data[0] : null;\nconst result = rec && rec.result;\nconst hasProfile = !!result && !Array.isArray(result) && typeof result === 'object' && Object.keys(result).length > 0;\nconst positions = hasProfile && Array.isArray(result.positions) ? result.positions : [];\n\nconst out = {\n  ...p,\n  location: (hasProfile && result.location) || p.location,\n  current_positions_count: positions.length,\n  current_company_name: '',\n  current_company_domain: '',\n  current_company_title: '',\n  route_to_leads: false,\n  old_email: '',\n};\n\nif (res.status !== 'completed') {\n  return { json: { ...out, employment_status: 'UNCONFIRMED', lead_status: 'REVIEW_LOOKUP_INCOMPLETE',\n    verification_reason: 'LinkedIn lookup did not complete (status: ' + (res.status || (res.error && res.error.message) || 'unknown') + '); email not verified' } };\n}\nif (!hasProfile) {\n  return { json: { ...out, employment_status: 'NO_PROFILE_DATA', lead_status: 'REVIEW_NO_PROFILE',\n    verification_reason: 'Snov.io returned no LinkedIn profile data; email not verified' } };\n}\nif (positions.length === 0) {\n  return { json: { ...out, employment_status: 'NO_CURRENT_POSITION', lead_status: 'REVIEW_NO_CURRENT_POSITION',\n    verification_reason: 'LinkedIn profile lists no current position; email not verified' } };\n}\n\nconst sameCo = positions.filter((x) =>\n  sameDomain(hostOf(x.url), String(p.company_domain || '').toLowerCase()) || sameName(x.name, p.company_name));\n\nif (sameCo.length) {\n  const exact = sameCo.find((x) => titleMatch(x.title, p.job_title));\n  const m = exact || sameCo.find((x) => HR_TITLE.test(x.title || '')) || sameCo[0];\n  const hasEmail = !!p.email;\n  if (exact) {\n    return { json: { ...out, employment_status: 'VERIFIED',\n      lead_status: hasEmail ? 'APPROVED_VERIFIED_CURRENT' : 'REVIEW_NO_EMAIL',\n      route_to_leads: hasEmail,\n      email_source: 'snov_reveal_verified',\n      current_company_name: m.name || p.company_name, current_company_title: m.title || '',\n      final_company_name: m.name || p.company_name, final_company_domain: p.company_domain,\n      final_job_title: m.title || p.job_title,\n      verification_reason: 'Company and designation match LinkedIn (' + (m.name || '') + ' - ' + (m.title || '') + ')' } };\n  }\n  return { json: { ...out, employment_status: 'VERIFIED_TITLE_CHANGED',\n    lead_status: hasEmail ? 'APPROVED_VERIFIED_CURRENT' : 'REVIEW_NO_EMAIL',\n    route_to_leads: hasEmail,\n    email_source: 'snov_reveal_verified',\n    current_company_name: m.name || p.company_name, current_company_title: m.title || '',\n    final_company_name: m.name || p.company_name, final_company_domain: p.company_domain,\n    final_job_title: m.title || p.job_title,\n    verification_reason: 'Still at ' + (m.name || p.company_name) + '; designation changed from \"' + p.job_title + '\" to \"' + (m.title || '') + '\"; email kept' } };\n}\n\nconst target = positions.find((x) => HR_TITLE.test(x.title || '')) || positions[0];\nconst h = hostOf(target.url);\nreturn { json: { ...out, employment_status: 'LEFT_COMPANY', lead_status: 'LEFT_COMPANY_RESEARCHING',\n  email: '',\n  old_email: p.email || '',\n  current_company_name: target.name || '',\n  current_company_domain: h && !h.includes('linkedin.com') ? h : '',\n  current_company_title: target.title || '',\n  verification_reason: 'No current LinkedIn position at ' + p.company_name + '; now ' + (target.title || 'role unknown') +\n    ' at ' + (target.name || 'unknown') + '. Old email ' + (p.email || 'n/a') + ' discarded' } };\n"
+      },
+      "id": "ce2576be-f667-4706-851c-2a013e5e1ce9",
+      "name": "Evaluate Employment",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2448,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bb70dd61-2bdb-46c2-a012-13e77e52656a",
+              "leftValue": "={{ $json.employment_status === 'VERIFIED' || $json.employment_status === 'VERIFIED_TITLE_CHANGED' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "13af306e-3a7b-493b-be8a-9f8d64f9daca",
+      "name": "Verified?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2656,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b5f78bb4-b0b6-451c-b849-891fe6e7e8f5",
+              "leftValue": "={{ $json.employment_status === 'LEFT_COMPANY' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f1c4ebef-faf1-4a23-8acc-9972079c6909",
+      "name": "Left Company?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2864,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.snov.io/v2/database-search/prospects/start",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ access_token: $(\"Snov - Get Access Token\").first().json.access_token, page: 1, filters: { prospect: { first_name: $json.first_name, last_name: $json.last_name }, company: { name: { include: [$json.current_company_name] } } } }) }}",
+        "options": {}
+      },
+      "id": "6a532be9-835b-486a-a44d-86ca272cf46c",
+      "name": "Snov - Search Prospect Again",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3008,
+        240
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 4
+      },
+      "id": "666a3722-0f9f-49f8-8bf6-83108c282e80",
+      "name": "Wait Search Again",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3232,
+        240
+      ],
+      "webhookId": "6b30f9e6-fe45-49f3-adbe-cbb4aec4a265"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.snov.io/v2/database-search/prospects/result/' + $json.meta?.task_hash }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $(\"Snov - Get Access Token\").first().json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4711b158-ddcb-4704-9c5b-303febbbf983",
+      "name": "Snov - Get Search Again Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3440,
+        240
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "37ecfe21-4c49-4bc5-8bf2-3777e48cd8ae",
+              "leftValue": "={{ $json.status === 'in_progress' && $runIndex < 12 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "201dd33b-2d5a-4773-9c56-dccf632de9d1",
+      "name": "Search Again Still Processing?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3616,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst HR_TITLE = /(\\bhr\\b|human resources|talent|recruit|people|hiring|staffing)/i;\nconst clean = (s) => String(s || '').toLowerCase()\n  .replace(/&/g, ' and ')\n  .replace(/\\b(pvt|private|ltd|limited|llp|llc|inc|incorporated|corp|corporation|co|company)\\b/g, ' ')\n  .replace(/[^a-z0-9]+/g, ' ')\n  .trim();\nconst hostOf = (u) => String(u || '').replace(/^https?:\\/\\//i, '').replace(/^www\\./i, '').split(/[\\/?#]/)[0].toLowerCase();\nconst sameDomain = (a, b) => !!a && !!b && (a === b || a.endsWith('.' + b) || b.endsWith('.' + a));\nconst sameName = (x, y) => {\n  const a = clean(x), b = clean(y);\n  if (!a || !b) return false;\n  return a === b || (Math.min(a.length, b.length) >= 4 && (a.includes(b) || b.includes(a)));\n};\nconst titleTokens = (t) => new Set(\n  String(t || '').toLowerCase()\n    .replace(/human resources?/g, 'hr')\n    .replace(/recruitment|recruiter|recruiting/g, 'recruit')\n    .replace(/[^a-z0-9 ]+/g, ' ')\n    .split(/\\s+/)\n    .filter((w) => w && !['and', 'of', 'the', 'for', 'a'].includes(w))\n);\nconst titleMatch = (a, b) => {\n  const x = titleTokens(a), y = titleTokens(b);\n  if (!x.size || !y.size) return false;\n  const [small, big] = x.size <= y.size ? [x, y] : [y, x];\n  const inter = [...small].filter((w) => big.has(w)).length;\n  if (small.size >= 2 && inter === small.size) return true;\n  return inter / new Set([...x, ...y]).size >= 0.6;\n};\n\nconst base = $('Evaluate Employment').item.json;\nconst r = $input.item.json || {};\nconst list = r.data && Array.isArray(r.data.prospects) ? r.data.prospects : [];\nconst first = String(base.first_name || '').toLowerCase();\nconst last = String(base.last_name || '').toLowerCase();\nconst liKey = (s) => String(s || '').toLowerCase().replace(/^https?:\\/\\/(www\\.)?/, '').replace(/\\/+$/, '');\nconst mine = liKey(base.linkedin_url);\nconst PREFIX = 'linkedin.com/in/';\n\nlet best = null, bestScore = 0;\nfor (const c of list) {\n  const cf = String(c.first_name || '').toLowerCase();\n  const cl = String(c.last_name || '').toLowerCase().replace(/\\*+$/, '');\n  if (!cf || cf !== first) continue;\n  if (cl && last && !last.startsWith(cl)) continue;\n  const co = c.company || {};\n  const companyOk = sameName(co.name, base.current_company_name) ||\n    sameDomain(String(co.domain || '').toLowerCase(), String(base.current_company_domain || '').toLowerCase());\n  if (!companyOk) continue;\n  const stem = liKey(c.linkedin_url).replace(/\\*+$/, '');\n  if (stem.length > PREFIX.length && mine && !mine.startsWith(stem)) continue;\n  let score = 1;\n  if (stem.length > PREFIX.length && mine.startsWith(stem)) score += 2;\n  if (c.email_and_hidden_info_reveal) score += 1;\n  if (score > bestScore) { best = c; bestScore = score; }\n}\n\nif (!best || !best.email_and_hidden_info_reveal) {\n  return { json: { ...base, research_found: false } };\n}\nreturn { json: { ...base, research_found: true,\n  reveal_url: best.email_and_hidden_info_reveal,\n  research_title: best.job_title || '',\n  research_company_domain: (best.company && best.company.domain) || '' } };\n"
+      },
+      "id": "9e046173-1c87-44bc-a3bb-5a40efa8e895",
+      "name": "Pick Re-Search Match",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3968,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "77e845d7-a5af-472e-9746-3ca03de02381",
+              "leftValue": "={{ $json.research_found === true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4ec33200-834a-4ba1-babe-7999a9b8138b",
+      "name": "Re-Search Match Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4224,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.reveal_url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ access_token: $(\"Snov - Get Access Token\").first().json.access_token }) }}",
+        "options": {}
+      },
+      "id": "65be0bd8-01a5-4a1a-af1f-8f2f354b15a6",
+      "name": "Snov - Reveal Email (New Company)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        5136,
+        240
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 4
+      },
+      "id": "83e462f9-5779-4ad0-8cb0-224a07d340cb",
+      "name": "Wait Reveal New",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5360,
+        240
+      ],
+      "webhookId": "75966854-b074-4d1f-83d9-f27809118329"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.snov.io/v2/database-search/prospects/search-emails/result/' + $json.meta?.task_hash }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "={{ $(\"Snov - Get Access Token\").first().json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6c4ea2b0-600e-42f0-8ab3-c4cfb814db6b",
+      "name": "Snov - Get New Reveal Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        5584,
+        240
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d218fa50-ae0e-4c29-8492-b9d28c4bbfa5",
+              "leftValue": "={{ $json.status === 'in_progress' && $runIndex < 12 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ec8cc2ea-466a-44e4-bbc8-fdd91471fd00",
+      "name": "New Reveal Still Processing?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5824,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst base = $('Pick Re-Search Match').item.json;\nconst r = $input.item.json || {};\nconst d = r.data && !Array.isArray(r.data) ? r.data : {};\nconst emails = Array.isArray(d.emails) ? d.emails : [];\nconst best = emails.find((e) => e.smtp_status === 'valid') || emails[0];\nconst ok = r.status === 'completed' && !!best && !!best.email;\nreturn { json: {\n  ...base,\n  first_name: d.first_name || base.first_name,\n  last_name: d.last_name || base.last_name,\n  linkedin_url: d.linkedin_url || base.linkedin_url,\n  email: ok ? best.email : '',\n  email_status: ok ? (best.smtp_status || 'unknown') : 'NOT_FOUND',\n  email_source: 'snov_search_again_new_company',\n  lead_status: ok ? 'APPROVED_REFOUND_NEW_COMPANY' : 'REVIEW_NO_EMAIL_AT_NEW_COMPANY',\n  route_to_leads: ok,\n  verification_reason: 'Left ' + base.company_name + '; LinkedIn shows ' + (base.current_company_title || 'role unknown') + ' at ' +\n    base.current_company_name + '. Searched again at the new company and ' + (ok ? 'revealed a fresh email' : 'found no email') +\n    '. Old email ' + (base.old_email || 'n/a') + ' discarded',\n  final_company_name: base.current_company_name,\n  final_company_domain: base.current_company_domain || base.research_company_domain || '',\n  final_job_title: base.current_company_title || base.research_title || base.job_title,\n} };\n"
+      },
+      "id": "28af4edd-4d27-49c8-b044-c7c54e7a9bf3",
+      "name": "Compile Re-Searched Lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7152,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fb768ed6-52a6-4c44-afdd-557a89405149",
+              "leftValue": "={{ !!$json.current_company_domain }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1e4e4ee7-3cb9-4089-8605-936b5b3177f7",
+      "name": "New Domain Known?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4464,
+        688
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.snov.io/v2/company-domain-by-name/start",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ \"Bearer \" + $(\"Snov - Get Access Token\").first().json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "names[]",
+              "value": "={{ $json.current_company_name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9f55928d-f76c-49f1-9ed6-d2c811ef6a56",
+      "name": "Snov - Start Domain Lookup",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        4688,
+        880
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 4
+      },
+      "id": "68dfe79a-a2f1-4c03-9a1f-3501f4b08677",
+      "name": "Wait Domain",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4912,
+        880
+      ],
+      "webhookId": "2ce134ef-961d-4995-aff5-e7326e40a589"
+    },
+    {
+      "parameters": {
+        "url": "https://api.snov.io/v2/company-domain-by-name/result",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "task_hash",
+              "value": "={{ $json.meta?.task_hash || $json.data?.task_hash }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ \"Bearer \" + $(\"Snov - Get Access Token\").first().json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "871a1788-3d76-41ee-b012-932f9f17ea8b",
+      "name": "Snov - Get Domain Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        5136,
+        784
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5697af08-e096-4ff0-9553-ebde06cdf99c",
+              "leftValue": "={{ $json.status === 'in_progress' && $runIndex < 12 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "92d300cb-194c-4d8c-8724-1798fafcc4bd",
+      "name": "Domain Still Processing?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5360,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst base = $('Pick Re-Search Match').item.json;\nconst r = $input.item.json || {};\nconst row = Array.isArray(r.data) ? r.data[0] : null;\nconst domain = row && row.result && row.result.domain ? String(row.result.domain).toLowerCase() : '';\nif (!domain) {\n  return { json: { ...base, current_company_domain: '', lead_status: 'REVIEW_NEW_COMPANY_DOMAIN_NOT_FOUND',\n    verification_reason: base.verification_reason + '. Domain for \"' + base.current_company_name + '\" could not be found' } };\n}\nreturn { json: { ...base, current_company_domain: domain } };\n"
+      },
+      "id": "28c3250f-dd81-48ea-8005-cc61d4c1a4f9",
+      "name": "Apply New Domain",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5584,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2e384ef7-3bac-470d-84a7-7b534ca24d78",
+              "leftValue": "={{ !!$json.current_company_domain }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "79d323fc-377d-4bd0-925b-335c1817b607",
+      "name": "Domain Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5808,
+        880
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "d2bdc304-59d1-4789-9973-776cb9c0235f",
+      "name": "Target Company Ready",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        6032,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.snov.io/v2/emails-by-domain-by-name/start",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ \"Bearer \" + $(\"Snov - Get Access Token\").first().json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ rows: [{ first_name: $json.first_name, last_name: $json.last_name, domain: $json.current_company_domain }] }) }}",
+        "options": {}
+      },
+      "id": "e28d237f-e74f-40d4-b559-5ed57eed1c73",
+      "name": "Snov - Start Email Finder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        6256,
+        736
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "id": "de7d49df-2232-4399-bce9-6635eb6c700e",
+      "name": "Wait Email Finder",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        6480,
+        736
+      ],
+      "webhookId": "eebf70ab-755e-4c22-ac2b-fa9c812cc205"
+    },
+    {
+      "parameters": {
+        "url": "https://api.snov.io/v2/emails-by-domain-by-name/result",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "task_hash",
+              "value": "={{ $json.meta?.task_hash || $json.data?.task_hash }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ \"Bearer \" + $(\"Snov - Get Access Token\").first().json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "713bba00-a722-4a9f-96f2-53414e8733cb",
+      "name": "Snov - Get Email Finder Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        6704,
+        656
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f9e3972f-d9d6-4aba-b9fc-9e2b84505ba7",
+              "leftValue": "={{ $json.status === 'in_progress' && $runIndex < 12 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b8eef541-3435-4d0b-a079-57adb4603e85",
+      "name": "Email Finder Still Processing?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        6928,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst base = $('Target Company Ready').item.json;\nconst r = $input.item.json || {};\nconst row = Array.isArray(r.data) ? r.data[0] : null;\nconst list = row && Array.isArray(row.result) ? row.result : [];\nconst best = list.find((e) => e.smtp_status === 'valid') || list[0];\nconst found = r.status === 'completed' && !!best && !!best.email;\nconst valid = found && best.smtp_status === 'valid';\nconst why = found && best.smtp_status !== 'valid' && best.unknown_status_reason ? ': ' + best.unknown_status_reason : '';\nreturn { json: {\n  ...base,\n  email: found ? best.email : '',\n  email_status: found ? best.smtp_status : 'NOT_FOUND',\n  email_source: 'snov_email_finder_new_company',\n  lead_status: valid ? 'APPROVED_REFOUND_NEW_COMPANY' : (found ? 'REVIEW_REFOUND_UNVERIFIED' : 'REVIEW_NO_EMAIL_AT_NEW_COMPANY'),\n  route_to_leads: valid,\n  verification_reason: 'Left ' + base.company_name + '; now ' + (base.current_company_title || 'role unknown') + ' at ' +\n    base.current_company_name + ' (' + base.current_company_domain + '). Search again found no match, so used Email Finder: ' +\n    (found ? best.smtp_status + why : 'no email found') + '. Old email ' + (base.old_email || 'n/a') + ' discarded',\n  final_company_name: base.current_company_name,\n  final_company_domain: base.current_company_domain,\n  final_job_title: base.current_company_title || base.job_title,\n} };\n"
+      },
+      "id": "2542ca56-3a02-4452-b199-9262ae96ad63",
+      "name": "Compile Re-Found Lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7152,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d0df6723-7af9-45fa-b3a7-605ef24e9e3e",
+              "leftValue": "={{ $json.route_to_leads === true }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "56d73a60-3233-4daa-a12c-993992ca47ae",
+      "name": "Route To Leads?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        7376,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "HR Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "First Name": "={{ $json.first_name }}",
+            "Last Name": "={{ $json.last_name }}",
+            "Job Title": "={{ $json.final_job_title || $json.job_title }}",
+            "Person Location": "={{ $json.location }}",
+            "Company Name": "={{ $json.final_company_name || $json.company_name }}",
+            "Company Domain": "={{ $json.final_company_domain || $json.company_domain }}",
+            "Industry": "={{ $json.industry }}",
+            "Email Address": "={{ $json.email || '' }}",
+            "LinkedIn URL": "={{ $json.linkedin_url || '' }}",
+            "LinkedIn Lookup Status": "={{ $json.employment_status || 'NOT_CHECKED' }}",
+            "LinkedIn Profiles Found": "={{ $json.current_positions_count || 0 }}",
+            "Verification Decision": "={{ $json.lead_status || 'REVIEW_REQUIRED' }}",
+            "Verification Reason": "={{ $json.verification_reason || '' }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Person Location",
+              "displayName": "Person Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Domain",
+              "displayName": "Company Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Status",
+              "displayName": "Email Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn Lookup Status",
+              "displayName": "LinkedIn Lookup Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn Profiles Found",
+              "displayName": "LinkedIn Profiles Found",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Verification Decision",
+              "displayName": "Verification Decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Verification Reason",
+              "displayName": "Verification Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        8016,
+        -368
+      ],
+      "id": "0f6c66ec-a4c2-441f-8b27-4aaa6a5a8b7a",
+      "name": "Append Approved Leads",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "HR Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1859866850,
+          "mode": "list",
+          "cachedResultName": "Review Queue",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=1859866850"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "First Name": "={{ $json.first_name }}",
+            "Last Name": "={{ $json.last_name }}",
+            "Job Title": "={{ $json.final_job_title || $json.job_title }}",
+            "Person Location": "={{ $json.location }}",
+            "Company Name": "={{ $json.final_company_name || $json.company_name }}",
+            "Company Domain": "={{ $json.final_company_domain || $json.company_domain }}",
+            "Industry": "={{ $json.industry }}",
+            "Email Address": "={{ $json.email || '' }}",
+            "LinkedIn URL": "={{ $json.linkedin_url || '' }}",
+            "LinkedIn Lookup Status": "={{ $json.employment_status || 'NOT_CHECKED' }}",
+            "LinkedIn Profiles Found": "={{ $json.current_positions_count || 0 }}",
+            "Verification Decision": "={{ $json.lead_status || 'REVIEW_REQUIRED' }}",
+            "Verification Reason": "={{ $json.verification_reason || '' }}",
+            "Email Status": "={{ $json.email_status || 'NOT_REVEALED' }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Person Location",
+              "displayName": "Person Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Domain",
+              "displayName": "Company Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Address",
+              "displayName": "Email Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Status",
+              "displayName": "Email Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn Lookup Status",
+              "displayName": "LinkedIn Lookup Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn Profiles Found",
+              "displayName": "LinkedIn Profiles Found",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Verification Decision",
+              "displayName": "Verification Decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Verification Reason",
+              "displayName": "Verification Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        8000,
+        1664
+      ],
+      "id": "485733f4-6266-4db0-8d61-2e16b5f704a1",
+      "name": "Review_Queue",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Reveal -> verify -> re-search\n1. Reveal email (1 credit; LinkedIn URL is masked until now)\n2. LinkedIn check (1 credit): current company AND designation vs the record\n3. Match -> verified lead. Same company, new title -> verified, title updated\n4. Different company -> take current company/title from LinkedIn, search Snov.io again for that person there, reveal the new email (1 credit)\n5. No match in the re-search -> Email Finder by name + domain (1-2 credits)\n6. Unverified / no email / not found -> Review Queue\nPolling loops retry up to 12 times.",
+        "height": 300,
+        "width": 600
+      },
+      "id": "1303fa26-b429-4fa0-b67c-c69036a3af68",
+      "name": "Flow Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Snov - Get Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Get Access Token": {
+      "main": [
+        [
+          {
+            "node": "Snov - Search HR Prospects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Search HR Prospects": {
+      "main": [
+        [
+          {
+            "node": "Snov - Get Prospect Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Get Prospect Results": {
+      "main": [
+        [
+          {
+            "node": "Split Out Prospects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Prospects": {
+      "main": [
+        [
+          {
+            "node": "Job Title Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job Title Filter": {
+      "main": [
+        [
+          {
+            "node": "Location Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Location Filter": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Prepare Prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Prospect": {
+      "main": [
+        [
+          {
+            "node": "Snov - Reveal Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Reveal Email": {
+      "main": [
+        [
+          {
+            "node": "Wait Reveal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Reveal": {
+      "main": [
+        [
+          {
+            "node": "Snov - Get Reveal Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Get Reveal Result": {
+      "main": [
+        [
+          {
+            "node": "Reveal Still Processing?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reveal Still Processing?": {
+      "main": [
+        [
+          {
+            "node": "Wait Reveal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compile Revealed Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compile Revealed Contact": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn URL Available?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn URL Available?": {
+      "main": [
+        [
+          {
+            "node": "Snov - Start LinkedIn Enrichment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tag No LinkedIn URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Start LinkedIn Enrichment": {
+      "main": [
+        [
+          {
+            "node": "Wait LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "Snov - Get LinkedIn Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Get LinkedIn Result": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn Still Processing?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Still Processing?": {
+      "main": [
+        [
+          {
+            "node": "Wait LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evaluate Employment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Employment": {
+      "main": [
+        [
+          {
+            "node": "Verified?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verified?": {
+      "main": [
+        [
+          {
+            "node": "Route To Leads?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Left Company?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Left Company?": {
+      "main": [
+        [
+          {
+            "node": "Snov - Search Prospect Again",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Review_Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Search Prospect Again": {
+      "main": [
+        [
+          {
+            "node": "Wait Search Again",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Search Again": {
+      "main": [
+        [
+          {
+            "node": "Snov - Get Search Again Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Get Search Again Result": {
+      "main": [
+        [
+          {
+            "node": "Search Again Still Processing?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Again Still Processing?": {
+      "main": [
+        [
+          {
+            "node": "Wait Search Again",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pick Re-Search Match",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Re-Search Match": {
+      "main": [
+        [
+          {
+            "node": "Re-Search Match Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Re-Search Match Found?": {
+      "main": [
+        [
+          {
+            "node": "Snov - Reveal Email (New Company)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "New Domain Known?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Reveal Email (New Company)": {
+      "main": [
+        [
+          {
+            "node": "Wait Reveal New",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Reveal New": {
+      "main": [
+        [
+          {
+            "node": "Snov - Get New Reveal Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Get New Reveal Result": {
+      "main": [
+        [
+          {
+            "node": "New Reveal Still Processing?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Reveal Still Processing?": {
+      "main": [
+        [
+          {
+            "node": "Wait Reveal New",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compile Re-Searched Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Domain Known?": {
+      "main": [
+        [
+          {
+            "node": "Target Company Ready",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Snov - Start Domain Lookup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Start Domain Lookup": {
+      "main": [
+        [
+          {
+            "node": "Wait Domain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Domain": {
+      "main": [
+        [
+          {
+            "node": "Snov - Get Domain Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Get Domain Result": {
+      "main": [
+        [
+          {
+            "node": "Domain Still Processing?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Domain Still Processing?": {
+      "main": [
+        [
+          {
+            "node": "Wait Domain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Apply New Domain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply New Domain": {
+      "main": [
+        [
+          {
+            "node": "Domain Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Domain Found?": {
+      "main": [
+        [
+          {
+            "node": "Target Company Ready",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Review_Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Target Company Ready": {
+      "main": [
+        [
+          {
+            "node": "Snov - Start Email Finder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Start Email Finder": {
+      "main": [
+        [
+          {
+            "node": "Wait Email Finder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Email Finder": {
+      "main": [
+        [
+          {
+            "node": "Snov - Get Email Finder Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Snov - Get Email Finder Result": {
+      "main": [
+        [
+          {
+            "node": "Email Finder Still Processing?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Finder Still Processing?": {
+      "main": [
+        [
+          {
+            "node": "Wait Email Finder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compile Re-Found Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compile Re-Searched Lead": {
+      "main": [
+        [
+          {
+            "node": "Route To Leads?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compile Re-Found Lead": {
+      "main": [
+        [
+          {
+            "node": "Route To Leads?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route To Leads?": {
+      "main": [
+        [
+          {
+            "node": "Append Approved Leads",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Review_Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag No LinkedIn URL": {
+      "main": [
+        [
+          {
+            "node": "Review_Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b01b7bff-7171-4695-ada6-f1fe46e55192",
+  "meta": {},
+  "nodeGroups": [],
+  "id": "uSQGvZDci8wrXdrz",
+  "tags": []
+}
